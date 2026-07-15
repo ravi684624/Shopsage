@@ -9,14 +9,17 @@ so the LLM can decide *when* and *how* to call them (tool-calling / function-cal
 """
 
 import json
-import os
+from pathlib import Path
 from typing import List, Optional
 
 from langchain_core.tools import tool
 
-CATALOG_PATH = os.path.join(os.path.dirname(__file__), "data", "catalog.json")
+# Resolves to the absolute path of the directory containing tools.py
+BASE_DIR = Path(__file__).resolve().parent
+CATALOG_PATH = BASE_DIR / "data" / "catalog.json"
 
-with open(CATALOG_PATH, "r") as f:
+# Added explicit utf-8 encoding to prevent system-dependent character issues
+with open(CATALOG_PATH, "r", encoding="utf-8") as f:
     CATALOG: List[dict] = json.load(f)
 
 
