@@ -27,28 +27,40 @@ st.set_page_config(page_title="ShopSage", page_icon="🛍️", layout="wide")
 # ---------------------------------------------------------------------------
 st.sidebar.title("🛍️ ShopSage settings")
 
+def get_secret(key):
+    try:
+        if key in st.secrets:
+            return st.secrets[key]
+    except Exception:
+        pass
+    return os.environ.get(key, "")
+
 provider = st.sidebar.selectbox("LLM provider", ["Groq", "Google", "OpenAI", "Anthropic"])
 
-if provider == "Groq":
-    api_key = st.sidebar.text_input(
-        "Groq API key", type="password", value=os.environ.get("GROQ_API_KEY", "")
-    )
-    model_name = st.sidebar.text_input("Model", value="llama-3.3-70b-versatile")
-elif provider == "Google":
-    api_key = st.sidebar.text_input(
-        "Google API key", type="password", value=os.environ.get("GOOGLE_API_KEY", "")
-    )
-    model_name = st.sidebar.text_input("Model", value="gemini-3.5-flash")
-elif provider == "OpenAI":
-    api_key = st.sidebar.text_input(
-        "OpenAI API key", type="password", value=os.environ.get("OPENAI_API_KEY", "")
-    )
-    model_name = st.sidebar.text_input("Model", value="gpt-4o-mini")
+env_key_map = {
+    "Groq": "GROQ_API_KEY",
+    "Google": "GOOGLE_API_KEY",
+    "OpenAI": "OPENAI_API_KEY",
+    "Anthropic": "ANTHROPIC_API_KEY",
+}
+default_models = {
+    "Groq": "llama-3.3-70b-versatile",
+    "Google": "gemini-3.5-flash",
+    "OpenAI": "gpt-4o-mini",
+    "Anthropic": "claude-sonnet-4-6",
+}
+
+env_var = env_key_map[provider]
+preset_key = get_secret(env_var)
+
+if preset_key:
+    api_key = preset_key
+    st.sidebar.success(f"✅ Using the built-in {provider} key for this demo")
 else:
-    api_key = st.sidebar.text_input(
-        "Anthropic API key", type="password", value=os.environ.get("ANTHROPIC_API_KEY", "")
-    )
-    model_name = st.sidebar.text_input("Model", value="claude-sonnet-4-6")
+    api_key = st.sidebar.text_input(f"{provider} API key", type="password")
+
+model_name = st.sidebar.text_input("Model", value=default_models[provider])
+
 
 st.sidebar.markdown("---")
 st.sidebar.caption(
